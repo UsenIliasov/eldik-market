@@ -1,0 +1,24 @@
+import { useState, useEffect, useRef } from 'react';
+
+export function useScrollDirection(threshold = 10) {
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
+  const [scrollY, setScrollY] = useState(0);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const updateScrollDirection = () => {
+      const currentScrollY = window.scrollY;
+      setScrollY(currentScrollY);
+
+      if (Math.abs(currentScrollY - lastScrollY.current) < threshold) return;
+
+      setScrollDirection(currentScrollY > lastScrollY.current ? 'down' : 'up');
+      lastScrollY.current = currentScrollY > 0 ? currentScrollY : 0;
+    };
+
+    window.addEventListener('scroll', updateScrollDirection, { passive: true });
+    return () => window.removeEventListener('scroll', updateScrollDirection);
+  }, [threshold]);
+
+  return { scrollDirection, scrollY };
+}
